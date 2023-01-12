@@ -65,7 +65,9 @@ app.post('/register', (req, res) => {
         'INSERT INTO users (name, password) VALUES (?, ?)',
         [name, hashedPassword],
         (err, result) => {
-            console.log(err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                res.sendStatus(400)
+            }
             res.send(result);
         }
     )
@@ -79,16 +81,14 @@ app.post('/login', (req, res) => {
         [name],
         (err, result) => {
             if (result.length === 0) {
-                res.status(401);
-                res.send({ message: 'Incorrect username or password'});
+                res.sendStatus(401);
             } else {
                 const passwordHash = result[0].password
                 const isPasswordCorrect = bcrypt.compareSync(password, passwordHash);
                 if (isPasswordCorrect) {
                     res.send(result[0]);
                 } else {
-                    res.status(401);
-                    res.send({ message: 'Incorrect username or password'});
+                    res.sendStatus(401);
                 }
             }
         }
