@@ -65,9 +65,10 @@ app.post('/register', (req, res) => {
         'INSERT INTO users (name, password) VALUES (?, ?)',
         [name, hashedPassword],
         (err, result) => {
-            if (err.code === 'ER_DUP_ENTRY') {
+            if (err?.code === 'ER_DUP_ENTRY') {
                 res.sendStatus(400)
             }
+
             res.send(result);
         }
     )
