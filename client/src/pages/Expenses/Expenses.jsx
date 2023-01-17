@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Button } from "../../components/Button/Button";
 import { Form } from "../../components/Form/From"
 import { Input } from "../../components/Input/Input";
+import { LOCAL_STORAGE_JWT_TOKEN_KEY } from "../../constants/constants";
 import { UserContext } from '../../contexts/UserContextWrapper';
 
 const ExpensesList = styled.ul`
@@ -44,10 +45,16 @@ export const Expenses = () => {
     const { user } = useContext(UserContext);
 
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_API_URL}/expenses?userId=${user.id}`)
+        fetch(`${process.env.REACT_APP_API_URL}/expenses?userId=${user.id}`, {
+            headers: {
+                authorization: 'Bearer ' + localStorage.getItem(LOCAL_STORAGE_JWT_TOKEN_KEY)
+            }
+        })
             .then(res => res.json())
             .then(data => {
-                setExpenses(data);
+                if (!data.error) {
+                    setExpenses(data);
+                }
                 setIsLoading(false);
             });
     }, [user.id]);
