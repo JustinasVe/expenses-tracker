@@ -81,7 +81,6 @@ export const Expenses = () => {
         })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
             if (!data.error) {
                 setExpenses(data);
                 setType('');
@@ -110,7 +109,6 @@ export const Expenses = () => {
                 />
                 <Input
                 placeholder="Date"
-                required
                 type="datetime-local"
                 onChange={(e) => setDate(e.target.value)}
                 value={date}

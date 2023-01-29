@@ -60,9 +60,15 @@ app.post('/expenses', verifyToken, (req, res) => {
     const { type, amount, timestamp } = req.body;
     const { id } = getUserFromToken(req);
 
+    const sqlQuery = timestamp ?
+    'INSERT INTO expenses (type, amount, userId, timestamp) VALUES (?, ?, ?, ?)' :
+    'INSERT INTO expenses (type, amount, userId) VALUES (?, ?, ?)';
+
+    const data = timestamp ? [type, amount, id, timestamp] : [type, amount, id];
+
     connection.execute(
-        'INSERT INTO expenses (type, amount, userId, timestamp) VALUES (?, ?, ?, ?)', 
-        [type, amount, id, timestamp],
+        sqlQuery, 
+        data,
         () => {
             connection.execute(
                 'SELECT * FROM expenses WHERE userId=?',
