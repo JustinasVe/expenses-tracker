@@ -64,7 +64,10 @@ app.post('/expenses', verifyToken, (req, res) => {
     'INSERT INTO expenses (type, amount, userId, timestamp) VALUES (?, ?, ?, ?)' :
     'INSERT INTO expenses (type, amount, userId) VALUES (?, ?, ?)';
 
-    const data = timestamp ? [type, amount, id, timestamp] : [type, amount, id];
+    const data = [type, amount, id];
+    if (timestamp) {
+        data.push(timestamp);
+    }
 
     connection.execute(
         sqlQuery, 
