@@ -24,17 +24,22 @@ const mysqlConfig = {
 const connection = mysql.createConnection(mysqlConfig);
 
 //7 uzduotis vienas sprendimas
-// app.get('/expenses/:id', (req, res) => {
-//     const { id } = req.params;
-//     connection.execute('SELECT * FROM expenses WHERE userId=?', [id], (err, expenses) => {
+// app.get('/expenses/:userId', (req, res) => {
+//     const { userId } = req.params;
+//     connection.execute('SELECT * FROM expenses WHERE userId=?', [userId], (err, expenses) => {
 //         res.send(expenses);
 //     });
 // });
+ 
+const getUserFromToken = (req) => {
+    const token = req.headers.authorization.split(' ')[1];
+    const user = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    return user;
+}
 
 const verifyToken = (req, res, next) => {
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        jwt.verify(token, process.env.JWT_SECRET_KEY);
+        getUserFromToken();
         next();
     } catch(e) {
         res.send({ error: 'Invalid token' });
@@ -43,23 +48,24 @@ const verifyToken = (req, res, next) => {
 
 //7 uzduotis kitas sprendimas
 app.get('/expenses', verifyToken, (req, res) => {
-    const { userId } = req.query;
+    const user = getUserFromToken();
     
-    connection.execute('SELECT * FROM expenses WHERE userId=?', [userId], (err, expenses) => {
+    connection.execute('SELECT * FROM expenses WHERE userId=?', [user.id], (err, expenses) => {
         res.send(expenses);
     });
 });
 
 //12 uzduotis 15 skaidre
 app.post('/expenses', verifyToken, (req, res) => {
-    const { type, amount, userId } = req.body;
+    const { type, amount } = req.body;
+    const { id } = getUserFromToken();
 
     connection.execute(
-        'INSERT INTO expenses (type, amount, userId) VALUES (?, ?, ?)', [type, amount, userId],
+        'INSERT INTO expenses (type, amount, userId) VALUES (?, ?, ?)', [type, amount, id],
         () => {
             connection.execute(
                 'SELECT * FROM expenses WHERE userId=?',
-                [userId],
+                [id],
                 (err, expenses) => {
                     res.send(expenses);
                 }
