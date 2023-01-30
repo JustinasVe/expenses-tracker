@@ -84,6 +84,25 @@ app.post('/expenses', verifyToken, (req, res) => {
     )
 });
 
+app.delete('/expenses/:id', verifyToken, (req, res) => {
+    const { id } = req.params;
+    const { id: userId } = getUserFromToken(req);
+
+    connection.execute(
+        'DELETE FROM expenses WHERE id=? AND userId=?',
+        [id, userId],
+        () => {
+            connection.execute(
+                'SELECT * FROM expenses WHERE userId=?',
+                [userId],
+                (err, expenses) => {
+                    res.send(expenses);
+                }
+            )
+        }
+    )
+});
+
 app.post('/register', (req, res) => {
     // name = username
     const { name, password } = req.body; 
